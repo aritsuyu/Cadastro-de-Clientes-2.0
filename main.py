@@ -1,11 +1,14 @@
 #Imports
 import customtkinter as ctk
 import sqlite3
+import os
+import json
 
 #System
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
+##DEFS
 #Banco de dados
 def criar_banco():
     conn = sqlite3.connect("clientes.db")
@@ -28,29 +31,76 @@ def criar_banco():
     ''')
     conn.commit()
     conn.close()
+#Armazenamento
+def mudar_armazenamento(armazenamento):
+    if armazenamento == "SQL":
+        print("Modo de armazenamento SQL selecionado")
+        pass  # Implementar lógica para SQLite
+    elif armazenamento == "JSON":
+        print("Modo de armazenamento JSON selecionado")
+        pass  # Implementar lógica para JSON
+    elif armazenamento == "TXT":
+        print("Modo de armazenamento TXT selecionado")
+        pass  # Implementar lógica para TXT
 
+#DEFs Salvar Cliente
 def salvar_cliente():
-    conn = sqlite3.connect("clientes.db")
-    c = conn.cursor()
-    c.execute('''
-        INSERT INTO clientes (nome, email, telefone, cpf, sexo, data_nascimento, endereco, cidade, estado, cep, observacoes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (
-        entry_nome.get(),
-        entry_email.get(),
-        entry_telefone.get(),
-        entry_cpf.get(),
-        sexo_var.get(),
-        entry_data_nascimento.get(),
-        entry_endereco.get(),
-        entry_cidade.get(),
-        entry_estado.get(),
-        entry_cep.get(),
-        entry_observacoes.get()
+    if mudar_armazenamento == "SQL":
+        conn = sqlite3.connect("clientes.db")
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO clientes (nome, email, telefone, cpf, sexo, data_nascimento, endereco, cidade, estado, cep, observacoes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            entry_nome.get(),
+            entry_email.get(),
+            entry_telefone.get(),
+            entry_cpf.get(),
+            sexo_var.get(),
+            entry_data_nascimento.get(),
+            entry_endereco.get(),
+            entry_cidade.get(),
+            entry_estado.get(),
+            entry_cep.get(),
+            entry_observacoes.get()
     ))
-    conn.commit()
-    conn.close()
-    limpar_campos()
+        conn.commit()
+        conn.close()
+        limpar_campos()
+    if mudar_armazenamento == "JSON":
+        dados_cliente = {
+            "nome": entry_nome.get(),
+            "email": entry_email.get(),
+            "telefone": entry_telefone.get(),
+            "cpf": entry_cpf.get(),
+            "sexo": sexo_var.get(),
+            "data_nascimento": entry_data_nascimento.get(),
+            "endereco": entry_endereco.get(),
+            "cidade": entry_cidade.get(),
+            "estado": entry_estado.get(),
+            "cep": entry_cep.get(),
+            "observacoes": entry_observacoes.get()
+        }
+        with open("clientes.json", "a") as arquivo_json:
+            json.dump(dados_cliente, arquivo_json)
+        limpar_campos()
+    if mudar_armazenamento == "TXT":
+        dados_cliente = {
+            "nome": entry_nome.get(),
+            "email": entry_email.get(),
+            "telefone": entry_telefone.get(),
+            "cpf": entry_cpf.get(),
+            "sexo": sexo_var.get(),
+            "data_nascimento": entry_data_nascimento.get(),
+            "endereco": entry_endereco.get(),
+            "cidade": entry_cidade.get(),
+            "estado": entry_estado.get(),
+            "cep": entry_cep.get(),
+            "observacoes": entry_observacoes.get()
+        }
+        with open("clientes.txt", "a") as arquivo_txt:
+            arquivo_txt.write(str(dados_cliente) + "\n")
+        limpar_campos()
 
 def limpar_campos():
     for entry in entradas:
@@ -119,9 +169,18 @@ tema_combo.set("System")
 tema_combo.pack()
 
 ctk.CTkLabel(aba_config, text="Tamanho da Interface:").pack(pady=10)
-escala_combo = ctk.CTkOptionMenu(aba_config, values=["0.8", "1.0", "1.2"], command=mudar_escala)
+escala_combo = ctk.CTkOptionMenu(aba_config, values=["0.8", "0.9", "1.0", "1.1", "1.2"], command=mudar_escala)
 escala_combo.set("1.0")
 escala_combo.pack()
 
+#Armazenamento
+ctk.CTkLabel(aba_config, text="Modo de Armazenamento:").pack(pady=10)
+armazenamento_combo = ctk.CTkOptionMenu(aba_config, values=["SQL", "JSON", "TXT"], command=mudar_armazenamento)
+armazenamento_combo.set("SQL")
+armazenamento_combo.pack()
+
+ctk.CTkLabel(aba_config, text="Versão: 2.5").pack(pady=10)
+
 criar_banco()
 body.mainloop()
+print("SOFTWARE Fechado")
